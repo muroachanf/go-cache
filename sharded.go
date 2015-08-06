@@ -83,7 +83,8 @@ func (sc *shardedCache) Get(k string) (interface{}, bool) {
 }
 
 func (sc *shardedCache) Increment(k string, n int64) error {
-	return sc.bucket(k).Increment(k, n)
+	_, err := sc.bucket(k).Increment(k, n)
+	return err
 }
 
 func (sc *shardedCache) IncrementFloat(k string, n float64) error {

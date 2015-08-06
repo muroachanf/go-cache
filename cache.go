@@ -120,46 +120,50 @@ func (c *cache) get(k string) (interface{}, bool) {
 // item's value is not an integer, if it was not found, or if it is not
 // possible to increment it by n. To retrieve the incremented value, use one
 // of the specialized methods, e.g. IncrementInt64.
-func (c *cache) Increment(k string, n int64) error {
+func (c *cache) Increment(k string, n int64) (r int64, err error) {
+	r, err = 0, nil
 	c.Lock()
 	v, found := c.items[k]
 	if !found || v.Expired() {
 		c.Unlock()
-		return fmt.Errorf("Item %s not found", k)
+		err = fmt.Errorf("Item %s not found", k)
+		return
 	}
 	switch v.Object.(type) {
 	case int:
-		v.Object = v.Object.(int) + int(n)
+		r = int64(v.Object.(int) + int(n))
 	case int8:
-		v.Object = v.Object.(int8) + int8(n)
+		r = int64(v.Object.(int8) + int8(n))
 	case int16:
-		v.Object = v.Object.(int16) + int16(n)
+		r = int64(v.Object.(int16) + int16(n))
 	case int32:
-		v.Object = v.Object.(int32) + int32(n)
+		r = int64(v.Object.(int32) + int32(n))
 	case int64:
-		v.Object = v.Object.(int64) + n
+		r = int64(v.Object.(int64) + n)
 	case uint:
-		v.Object = v.Object.(uint) + uint(n)
+		r = int64(v.Object.(uint) + uint(n))
 	case uintptr:
-		v.Object = v.Object.(uintptr) + uintptr(n)
+		r = int64(v.Object.(uintptr) + uintptr(n))
 	case uint8:
-		v.Object = v.Object.(uint8) + uint8(n)
+		r = int64(v.Object.(uint8) + uint8(n))
 	case uint16:
-		v.Object = v.Object.(uint16) + uint16(n)
+		r = int64(v.Object.(uint16) + uint16(n))
 	case uint32:
-		v.Object = v.Object.(uint32) + uint32(n)
+		r = int64(v.Object.(uint32) + uint32(n))
 	case uint64:
-		v.Object = v.Object.(uint64) + uint64(n)
+		r = int64(v.Object.(uint64) + uint64(n))
 	case float32:
-		v.Object = v.Object.(float32) + float32(n)
+		r = int64(v.Object.(float32) + float32(n))
 	case float64:
-		v.Object = v.Object.(float64) + float64(n)
+		r = int64(v.Object.(float64) + float64(n))
 	default:
 		c.Unlock()
-		return fmt.Errorf("The value for %s is not an integer", k)
+		err = fmt.Errorf("The value for %s is not an integer", k)
+		return
 	}
+	v.Object = r
 	c.Unlock()
-	return nil
+	return
 }
 
 // Increment an item of type float32 or float64 by n. Returns an error if the
